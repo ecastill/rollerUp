@@ -9,6 +9,9 @@
 #define BOTON_UP 12
 #define BOTON_DOWN 14
 #define BOTON_ENTER 27
+#define BOTON_TOPE_UP 26
+#define BOTON_TOPE_DOWN 25
+
 
 
 
@@ -102,39 +105,7 @@ int  temp_subida;
 int temp_bajada;
 int accion_numero;
 
-/*
-const char* jsonString = R"rawliteral(
-{
-  "descripcion":"",
-  "tipo":"MENU",
-  "cantidad":3,
-  "activo":-1,
-  "nivel":0,
-  "accion":"",
-  "hijos":[
-    {"descripcion":"Configuracion","tipo":"MENU","cantidad":3,"activo":-1,"nivel":1,"accion":"",
-      "hijos":[
-        {"descripcion":"Temp Subida","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"TEMPERATURASUBIDA"},
-        {"descripcion":"Temp Bajada","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"TEMPERATURABAJADA"},
-        {"descripcion":"Fecha","tipo":"MENU","cantidad":6,"activo":0,"nivel":2,"accion":"",
-          "hijos":[
-            {"descripcion":"Ano","tipo":"ACCION","cantidad":0,"activo":0,"nivel":3,"accion":"YEAR"},
-            {"descripcion":"Mes","tipo":"ACCION","cantidad":0,"activo":0,"nivel":3,"accion":"MES"},
-            {"descripcion":"Dia","tipo":"ACCION","cantidad":0,"activo":0,"nivel":3,"accion":"DIA"},
-            {"descripcion":"Hora","tipo":"ACCION","cantidad":0,"activo":0,"nivel":3,"accion":"HORA"},
-            {"descripcion":"Minuto","tipo":"ACCION","cantidad":0,"activo":0,"nivel":3,"accion":"MINUTO"},
-            {"descripcion":"Atras","tipo":"ATRAS","cantidad":0,"activo":0,"nivel":3,"accion":""}
-          ]
-        },
-        {"descripcion":"Atras","tipo":"ATRAS","cantidad":0,"activo":0,"nivel":2,"accion":""}
-      ]
-    },
-    {"descripcion":"Manual","tipo":"MENU","cantidad":0,"activo":-1,"nivel":1,"accion":"","hijos":[]},
-    {"descripcion":"Salir","tipo":"SALIR","cantidad":0,"activo":0,"nivel":1,"accion":"", "hijos":[]}
-  ]
-}
-)rawliteral";
-*/
+
 
 CMenuItem* parseMenu(JsonObject obj, CMenuItem* parent = nullptr) {
   CMenuItem* item = new CMenuItem();
@@ -224,6 +195,8 @@ struct tm timeinfo;
   pinMode(BOTON_UP, INPUT_PULLUP); // Configura el pin 12 como entrada con pull-up interno
   pinMode(BOTON_DOWN, INPUT_PULLUP); // Configura el pin 14 como entrada con pull-up interno
   pinMode(BOTON_ENTER, INPUT_PULLUP); // Configura el pin 27 como entrada con pull-up interno
+  pinMode(BOTON_TOPE_UP, INPUT_PULLUP); // Configura el pin 26 como entrada con pull-up interno
+  pinMode(BOTON_TOPE_DOWN, INPUT_PULLUP); // Configura el pin 25 como entrada con pull-up interno
 
 
   Wire.begin(LQ_SDA, LQ_SCL); // Configura I2C en ESP32 (SDA = GPIO 21, SCL = GPIO 22)
@@ -264,7 +237,7 @@ Serial.println("iniciando----->");
 
 void loop() {
 
-  
+
 
 
   
@@ -273,6 +246,19 @@ void loop() {
   int estadoBoton_up = digitalRead(BOTON_UP); // Lee el estado del botón
   int estadoBoton_down = digitalRead(BOTON_DOWN); // Lee el estado del botón
   int estadoBoton_enter = digitalRead(BOTON_ENTER); // Lee el estado del botón
+  int estadoBoton_tope_up = digitalRead(BOTON_TOPE_UP); // Lee el estado del botón
+    int estadoBoton_tope_down = digitalRead(BOTON_TOPE_DOWN); // Lee el estado del botón
+
+if (estadoBoton_tope_up == LOW) { 
+
+  Serial.println("el tope_up est en LOW" );
+}
+
+if (estadoBoton_tope_down == LOW) { 
+
+  Serial.println("el tope_down est en LOW" );
+}
+  
 
   //
 if (actual==nullptr)
