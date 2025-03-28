@@ -4,6 +4,7 @@
 #include <RTClib.h>
 #include <ArduinoJson.h>
 #include "Configuraciones.h"
+#include "CMenuItem.h"
 
 #define BOTON_MENU 13  // Pin donde está conectado el botón
 #define BOTON_UP 12
@@ -13,6 +14,11 @@
 #define BOTON_TOPE_DOWN 25
 
 
+//probando el cambio
+
+
+
+
 
 
 #define LCD_LINEAS 2
@@ -20,6 +26,9 @@
 #define ACCION_NUMERO "NUMERO"
 #define TEMPERATURASUBIDA "TEMPERATURASUBIDA"
 #define TEMPERATURABAJADA "TEMPERATURABAJADA"
+#define FECHAACTUAL "FECHAACTUAL"
+#define HORAACTUAL "HORAACTUAL"
+
 
 
 #define LCD_ADDRESS 0x27 
@@ -47,53 +56,10 @@ byte letra_N[] = {
 };
 
 
-class CMenuItem{  
-  public:
-  String descripcion;  
-  int nivel;
-  int cantidad;
-  int activo;
-  int posicion;
-  String tipo;
-  String accion;
-  CMenuItem* hijos[10];
-  CMenuItem* parent;
-
-  CMenuItem(){
-        descripcion = "";
-        nivel = 0;
-        cantidad = 0;
-        activo=0;
-        posicion=-1;
-        for (int i = 0; i < 6; i++) {
-            hijos[i] = nullptr; // Inicializar hijos en NULL
-        }
-        tipo="";
-        accion="";
-        parent=nullptr;
-  }
-
-  void siguiente_menu()
-  {
-   posicion=(posicion+1)%cantidad;
-  }
-
-  void anterior_menu()
-  {
-   posicion=(posicion-1 + cantidad)%cantidad;
-  }
-  
-};
-
-
-
 CMenuItem* raiz;
 CMenuItem* actual;
 int en_accion;
 
-//String menu[]={"Configuracion","Manual","Salir","OTRO"};
-//String submenu_1[]={"Temperatura Subir","Temperatura Bajar","Atras"};
-//String submenu_2[]={"Atras"};
 
 int largo_menu=3;
 String pantalla_inicio[]={"Roller UP","V1.0"};
@@ -104,28 +70,17 @@ String glosa_accion="";
 int  temp_subida;
 int temp_bajada;
 int accion_numero;
+String accion_fecha;
+DateTime g_fecha_actual;
 
 
-
-CMenuItem* parseMenu(JsonObject obj, CMenuItem* parent = nullptr) {
-  CMenuItem* item = new CMenuItem();
-  item->descripcion = obj["descripcion"].as<String>();
-  item->tipo = obj["tipo"].as<String>();
-  item->cantidad = obj["cantidad"].as<int>();
-  item->activo = obj["activo"].as<int>();
-  item->nivel = obj["nivel"].as<int>();
-  item->accion = obj["accion"].as<String>();
-  item->parent = parent;
-
-  if (obj.containsKey("hijos")) {
-    JsonArray hijosArray = obj["hijos"].as<JsonArray>();
-    int hijosCount = min(10, (int)hijosArray.size());  // Máximo 10 hijos por tu estructura
-    for (int i = 0; i < hijosCount; i++) {
-      item->hijos[i] = parseMenu(hijosArray[i], item); // Recursión
-    }
-  }
-  return item;
+ DateTime obtener_fecha()
+{
+DateTime now_rtc = rtc.now();
+  return now_rtc ;
 }
+
+
 
 
 
@@ -142,7 +97,7 @@ void setup() {
   }
 
   JsonObject root = doc.as<JsonObject>();
-  raiz = parseMenu(root);
+  raiz = CMenuItem::parseMenu(root);
   
 
 
@@ -238,16 +193,12 @@ Serial.println("iniciando----->");
 void loop() {
 
 
-
-
-  
-
   int estadoBoton_menu = digitalRead(BOTON_MENU); // Lee el estado del botón
   int estadoBoton_up = digitalRead(BOTON_UP); // Lee el estado del botón
   int estadoBoton_down = digitalRead(BOTON_DOWN); // Lee el estado del botón
   int estadoBoton_enter = digitalRead(BOTON_ENTER); // Lee el estado del botón
   int estadoBoton_tope_up = digitalRead(BOTON_TOPE_UP); // Lee el estado del botón
-    int estadoBoton_tope_down = digitalRead(BOTON_TOPE_DOWN); // Lee el estado del botón
+  int estadoBoton_tope_down = digitalRead(BOTON_TOPE_DOWN); // Lee el estado del botón
 
 if (estadoBoton_tope_up == LOW) { 
 
@@ -496,6 +447,35 @@ void ejecutar_accion(String accion)
     lcd.print(accion_numero);
   
   }
+  else if (accion==FECHAACTUAL)
+  {
+    g_fecha_actual=obtener_fecha();
+    
+    
+    en_accion=1;
+    tipo_accion="FECHA";
+    glosa_accion="Fecha";      
+    String accion_fecha = String(g_fecha_actual.year()) + "-" +   (g_fecha_actual.month() < 10 ? "0" : "") + String(g_fecha_actual.month()) + "-" +     (g_fecha_actual.day() < 10 ? "0" : "") + String(g_fecha_actual.day());
+    limpiar_pantalla();
+    lcd.setCursor(0, 0);
+    lcd.print(glosa_accion);  
+    lcd.setCursor(0, 1);
+    lcd.print(accion_fecha);
+  
+  }
+  else if (accion==HORAACTUAL)
+  {
+    en_accion=1;
+    tipo_accion="NUMERO";
+    glosa_accion="TEMP BAJADA";
+    accion_numero=temp_subida;
+    limpiar_pantalla();
+    lcd.setCursor(0, 0);
+    lcd.print(glosa_accion);  
+    lcd.setCursor(0, 1);
+    lcd.print(accion_numero);
+  
+  }
   
 }
 
@@ -564,165 +544,7 @@ void mostrar_menu(CMenuItem* nodo,  int lineas)
  
 }
 
-void cargar_menu()
-{
-  raiz= new CMenuItem();
-  raiz->cantidad=3;
-  raiz->descripcion="";
-  raiz->activo=-1;
-  raiz->nivel=0;
-  raiz->tipo="MENU";
-  raiz->accion="";
-  raiz->parent=nullptr;
 
-  CMenuItem* subhijo = new CMenuItem();
-
-  CMenuItem* hijo = new CMenuItem();
-  hijo->descripcion="Configuracion";
-  hijo->cantidad=3;
-  hijo->nivel=1;
-  hijo->activo=0;
-  hijo->tipo="MENU";
-  hijo->accion="";
-  hijo->parent=raiz;
-
-  hijo->hijos[0]=new CMenuItem();
-  hijo->hijos[0]->descripcion="Temp subida";
-  hijo->hijos[0]->cantidad=0;
-  hijo->hijos[0]->nivel=2;
-  hijo->hijos[0]->tipo="ACCION";
-  hijo->hijos[0]->accion="TEMPERATURASUBIDA";
-  hijo->hijos[0]->parent=hijo;
-  
-
-  hijo->hijos[1]=new CMenuItem();
-  hijo->hijos[1]->descripcion="Temp bajada";
-  hijo->hijos[1]->cantidad=0;
-  hijo->hijos[1]->nivel=2;
-  hijo->hijos[1]->tipo="ACCION";
-  hijo->hijos[1]->accion="TEMPERATURABAJADA";
-  hijo->hijos[1]->parent=hijo;
-
-  hijo->hijos[2]=new CMenuItem();
-  hijo->hijos[2]->descripcion="Fecha";
-  hijo->hijos[2]->cantidad=6;
-  hijo->hijos[2]->nivel=2;
-  hijo->hijos[2]->tipo="MENU";
-  hijo->hijos[2]->accion="";
-  hijo->hijos[2]->parent=hijo;
-
-
-//year
-  subhijo = new CMenuItem();
-  subhijo->descripcion="Año";
-  subhijo->cantidad=0;
-  subhijo->nivel=3;
-  subhijo->tipo="ACCION";
-  subhijo->accion="YEAR";  
-  subhijo->parent=hijo->hijos[2];
-  hijo->hijos[2]->hijos[0]=subhijo;
-  
-
-
-//mes
-  subhijo = new CMenuItem();
-  subhijo->descripcion="Mes";
-  subhijo->cantidad=0;
-  subhijo->nivel=3;
-  subhijo->tipo="ACCION";
-  subhijo->accion="MES";  
-  subhijo->parent=hijo->hijos[2];
-  hijo->hijos[2]->hijos[1]=subhijo;
-
-//dia
-  subhijo = new CMenuItem();
-  subhijo->descripcion="Dia";
-  subhijo->cantidad=0;
-  subhijo->nivel=3;
-  subhijo->tipo="ACCION";
-  subhijo->accion="DIA";  
-  subhijo->parent=hijo->hijos[2];
-  hijo->hijos[2]->hijos[2]=subhijo;
-
-
-//hora
-  subhijo = new CMenuItem();
-  subhijo->descripcion="Hora";
-  subhijo->cantidad=0;
-  subhijo->nivel=3;
-  subhijo->tipo="ACCION";
-  subhijo->accion="HORA";  
-  subhijo->parent=hijo->hijos[2];
-  hijo->hijos[2]->hijos[3]=subhijo;
-  
-//minut0
-  subhijo = new CMenuItem();
-  subhijo->descripcion="Minuto";
-  subhijo->cantidad=0;
-  subhijo->nivel=3;
-  subhijo->tipo="ACCION";
-  subhijo->accion="HORA";  
-  subhijo->parent=hijo->hijos[2];
-  hijo->hijos[2]->hijos[4]=subhijo;
-//atras
-subhijo = new CMenuItem();
-  subhijo->descripcion="Atras";
-  subhijo->cantidad=0;
-  subhijo->nivel=3;
-  subhijo->tipo="ATRAS";
-  subhijo->accion="";  
-  subhijo->parent=hijo->hijos[2];
-  hijo->hijos[2]->hijos[5]=subhijo;
-
-
-
-
-  
-
-
-  hijo->hijos[3]=new CMenuItem();
-  hijo->hijos[3]->descripcion="Atras";
-  hijo->hijos[3]->cantidad=0;
-  hijo->hijos[3]->nivel=2;
-  hijo->hijos[3]->tipo="ATRAS";
-  hijo->hijos[3]->accion="";
-  hijo->hijos[3]->parent=hijo;
-
-
-
-   
-  raiz->hijos[0]=hijo;
-  raiz->cantidad=1;
-  
-
-
-
-  
-
-  hijo = new CMenuItem();
-  hijo->descripcion="Manual";
-  hijo->cantidad=0;
-  hijo->nivel=1;
-  hijo->activo=0;  
-  hijo->tipo="MENU";
-  hijo->accion="";
-  hijo->parent=raiz;
-  raiz->hijos[1]=hijo;
-  raiz->cantidad=2;
-  
-
-  hijo = new CMenuItem();
-  hijo->descripcion="Salir";
-  hijo->cantidad=0;
-  hijo->nivel=1;
-  hijo->activo=0; 
-  hijo->tipo="SALIR";
-  hijo->accion=""; 
-  raiz->hijos[2]=hijo;
-  hijo->parent=raiz;
-  raiz->cantidad=3;
-
-}
 
 
 String* splitStringConDelimitador(String texto, char delimitador, int &cantidad) {
