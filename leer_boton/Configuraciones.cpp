@@ -13,7 +13,7 @@ const char* jsonString = R"rawliteral(
       "hijos":[
         {"descripcion":"Temp Subida","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"TEMPERATURASUBIDA"},
         {"descripcion":"Temp Bajada","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"TEMPERATURABAJADA"},
-        {"descripcion":"Fecha","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"FECHAACTUAL"},        
+        {"descripcion":"Fecha actual","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"FECHAACTUAL"},        
         {"descripcion":"Atras","tipo":"ATRAS","cantidad":0,"activo":0,"nivel":2,"accion":""}
       ]
     },
