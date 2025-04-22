@@ -25,6 +25,11 @@
 #define DHTTYPE DHT11  // Cambia a DHT22 si usas ese modelo
 
 
+
+//*******************************************+
+// la tarjeta que se esta usando aparece como "ESP32 DEV Module"
+
+
 //IBT_2
 #define RPWM 33
 #define LPWM 32
