@@ -4,7 +4,7 @@ const char* jsonString = R"rawliteral(
 {
   "descripcion":"",
   "tipo":"MENU",
-  "cantidad":3,
+  "cantidad":4,
   "activo":-1,
   "nivel":0,
   "accion":"",
@@ -14,11 +14,12 @@ const char* jsonString = R"rawliteral(
         {"descripcion":"Temp Subida","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"TEMPERATURASUBIDA"},
         {"descripcion":"Temp Bajada","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"TEMPERATURABAJADA"},
         {"descripcion":"Fecha actual","tipo":"ACCION","cantidad":0,"activo":0,"nivel":2,"accion":"FECHAACTUAL"},        
-        {"descripcion":"Atras","tipo":"ATRAS","cantidad":0,"activo":0,"nivel":2,"accion":""}
+        {"descripcion":"Atras","tipo":"ATRAS","cantidad":0,"activo":0,"nivel":2,"accion":"ATRAS"}
       ]
     },
-    {"descripcion":"Manual","tipo":"MENU","cantidad":0,"activo":-1,"nivel":1,"accion":"","hijos":[]},
-    {"descripcion":"Salir","tipo":"SALIR","cantidad":0,"activo":0,"nivel":1,"accion":"", "hijos":[]}
+    {"descripcion":"Activo","tipo":"ACCION","cantidad":0,"activo":0,"nivel":1,"accion":"ACTIVADO"},
+    {"descripcion":"Manual","tipo":"ACCION","cantidad":0,"activo":0,"nivel":1,"accion":"MANUAL"},
+    {"descripcion":"Salir","tipo":"ACCION","cantidad":0,"activo":0,"nivel":1,"accion":"SALIR", "hijos":[]}
   ]
 }
 )rawliteral";
